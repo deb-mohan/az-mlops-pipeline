@@ -105,13 +105,13 @@ case "$COMMAND" in
     # 5.7: Plan command
     plan)
         print_header "Terraform Plan: $ENV"
-        terraform plan "${EXTRA_ARGS[@]}"
+        terraform plan ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
         ;;
     
     # 5.8: Apply command
     apply)
         print_header "Terraform Apply: $ENV"
-        terraform apply "${EXTRA_ARGS[@]}"
+        terraform apply ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
         ;;
     
     # 5.9: Destroy command with confirmation
@@ -123,19 +123,19 @@ case "$COMMAND" in
         echo ""
         read -p "Press ENTER to continue or Ctrl+C to cancel..."
         echo ""
-        terraform destroy "${EXTRA_ARGS[@]}"
+        terraform destroy ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
         ;;
     
     # 5.10: Validate command
     validate)
         print_header "Terraform Validate"
-        terraform validate "${EXTRA_ARGS[@]}"
+        terraform validate ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
         ;;
     
     # 5.11: Format command
     fmt)
         print_header "Terraform Format"
-        terraform fmt -recursive "${EXTRA_ARGS[@]}"
+        terraform fmt -recursive ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
         ;;
     
     *)

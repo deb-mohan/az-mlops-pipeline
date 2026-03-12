@@ -89,13 +89,15 @@ print_info "Checking uv..."
 if command -v uv &> /dev/null; then
     print_success "uv is already installed: $(uv --version)"
 else
-    print_warning "uv not found. Installing..."
-    if curl -LsSf https://astral.sh/uv/install.sh | sh; then
+    print_warning "uv not found. Installing via Homebrew (verified package)..."
+    # Use Homebrew instead of curl script for better security
+    if brew install uv; then
         print_success "uv installed successfully"
-        # Add uv to PATH for current session
-        export PATH="$HOME/.cargo/bin:$PATH"
     else
-        print_error "Failed to install uv"
+        print_error "Failed to install uv via Homebrew"
+        echo ""
+        print_warning "Alternative: Install manually with checksum verification"
+        echo "  Visit: https://docs.astral.sh/uv/getting-started/installation/"
         exit 1
     fi
 fi

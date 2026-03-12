@@ -116,38 +116,54 @@ else
     fi
 fi
 
-# 3.7: Retrieve storage account access key
-print_header "Retrieving Access Key"
-print_info "Getting storage account access key..."
-STORAGE_KEY=$(az storage account keys list \
-    --resource-group "$RESOURCE_GROUP" \
-    --account-name "$STORAGE_ACCOUNT" \
-    --query '[0].value' \
-    --output tsv)
+# 3.7: Configure Azure authentication for Terraform backend
+print_header "Configuring Backend Authentication"
+print_info "Configuring Azure authentication for Terraform..."
 
-if [ -z "$STORAGE_KEY" ]; then
-    print_error "Failed to retrieve storage account key"
-    exit 1
-fi
-print_success "Access key retrieved"
+# Grant current user Storage Blob Data Contributor role on the storage account
+CURRENT_USER=$(az account show --query user.name -o tsv)
+print_info "Granting Storage Blob Data Contributor role to: $CURRENT_USER"
 
-# 3.8: Save to .env.local
-print_info "Saving access key to .env.local..."
-if [ -f ".env.local" ]; then
-    # Update existing file
-    if grep -q "STORAGE_ACCOUNT_KEY=" .env.local; then
-        sed -i.bak "s|STORAGE_ACCOUNT_KEY=.*|STORAGE_ACCOUNT_KEY=$STORAGE_KEY|" .env.local
-        rm -f .env.local.bak
-        print_success ".env.local updated"
-    else
-        echo "STORAGE_ACCOUNT_KEY=$STORAGE_KEY" >> .env.local
-        print_success "Access key added to .env.local"
-    fi
+if az role assignment create \
+    --role "Storage Blob Data Contributor" \
+    --assignee "$CURRENT_USER" \
+    --scope "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/$RESOURCE_GROUP/providers/Microsoft.Storage/storageAccounts/$STORAGE_ACCOUNT" \
+    --output none 2>/dev/null; then
+    print_success "Role assignment created"
 else
-    # Create new file
-    echo "STORAGE_ACCOUNT_KEY=$STORAGE_KEY" > .env.local
-    print_success ".env.local created"
+    print_warning "Role assignment may already exist (this is normal)"
 fi
+
+# 3.8: Create .env.local with authentication mode configuration
+print_info "Creating .env.local with secure authentication configuration..."
+cat > .env.local << 'EOF'
+# Azure Backend Authentication Configuration
+# Terraform will use Azure CLI authentication (no access keys stored)
+# Ensure you are logged in with: az login
+
+# Backend configuration
+BACKEND_RESOURCE_GROUP="terraform-state-rg"
+BACKEND_STORAGE_ACCOUNT="tfstateiemlops"
+BACKEND_CONTAINER="tfstate"
+
+# Authentication: Use Azure CLI (managed identity in CI/CD)
+# No access keys stored - uses --auth-mode login
+EOF
+
+# Update with actual values
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # macOS
+    sed -i '' "s|terraform-state-rg|$RESOURCE_GROUP|g" .env.local
+    sed -i '' "s|tfstateiemlops|$STORAGE_ACCOUNT|g" .env.local
+    sed -i '' "s|tfstate|$CONTAINER|g" .env.local
+else
+    # Linux
+    sed -i "s|terraform-state-rg|$RESOURCE_GROUP|g" .env.local
+    sed -i "s|tfstateiemlops|$STORAGE_ACCOUNT|g" .env.local
+    sed -i "s|tfstate|$CONTAINER|g" .env.local
+fi
+
+print_success ".env.local created with secure configuration"
 
 # 3.9: Display completion summary
 print_header "Bootstrap Complete!"
@@ -158,7 +174,11 @@ echo "Backend Configuration:"
 echo "  Resource Group: ${BLUE}$RESOURCE_GROUP${NC}"
 echo "  Storage Account: ${BLUE}$STORAGE_ACCOUNT${NC}"
 echo "  Container: ${BLUE}$CONTAINER${NC}"
-echo "  Access Key: Saved to ${BLUE}.env.local${NC}"
+echo "  Authentication: ${GREEN}Azure CLI (no access keys)${NC}"
+echo ""
+print_warning "Important: Terraform will use Azure CLI authentication"
+echo "  - Local development: Ensure you are logged in with ${BLUE}az login${NC}"
+echo "  - CI/CD pipelines: Use managed identity or service principal"
 echo ""
 echo "Next steps:"
 echo "  1. Initialize environment: ${BLUE}make init-dev${NC}"

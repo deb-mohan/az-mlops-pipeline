@@ -142,7 +142,7 @@ make apply ENV=johndoe
 
 ## Backend Configuration and State Management
 
-This project uses Azure Storage for Terraform state management with automated backend setup.
+This project uses Azure Storage for Terraform state management with automated backend setup and secure authentication.
 
 ### Backend Resources
 
@@ -165,9 +165,15 @@ make bootstrap
 bash scripts/bootstrap-backend.sh westus2
 ```
 
-### Access Key Storage
+### Secure Authentication
 
-The storage account access key is automatically retrieved and saved to `.env.local` (gitignored) for your convenience. This file is never committed to version control.
+The backend uses **Azure CLI authentication** instead of access keys for enhanced security:
+
+- **Local Development**: Terraform uses your Azure CLI login (`az login`)
+- **CI/CD Pipelines**: Use managed identity or service principal
+- **No Access Keys**: No credentials stored in plaintext files
+
+The `.env.local` file contains only configuration metadata (resource names), not sensitive credentials.
 
 ### State File Isolation
 
