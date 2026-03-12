@@ -1,0 +1,14 @@
+# Template for feature branch environments
+# Copy this file and replace <username> with your username
+# Example: cp feature.auto.tfvars.template johndoe.auto.tfvars
+
+project_name     = "iemlops"
+environment      = "<username>"  # Replace with your username
+location         = "eastus"
+ml_workspace_sku = "Basic"
+
+tags = {
+  CostCenter = "engineering"
+  Owner      = "<username>"  # Replace with your username
+  Temporary  = "true"
+}

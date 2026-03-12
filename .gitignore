@@ -1,0 +1,28 @@
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local overrides (DO NOT commit these)
+*.local.tfvars
+secrets.tfvars
+
+# Note: *.auto.tfvars files SHOULD be committed (they contain non-sensitive config)
