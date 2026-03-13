@@ -24,5 +24,6 @@ Thumbs.db
 # Local overrides (DO NOT commit these)
 *.local.tfvars
 secrets.tfvars
+.env.local
 
 # Note: *.auto.tfvars files SHOULD be committed (they contain non-sensitive config)
