@@ -32,8 +32,8 @@ GENERATED_BACKEND=false
 # Determine storage account name and resource group
 if [ -f "$BACKEND_TF" ]; then
     # Parse existing backend.tf
-    STORAGE_ACCOUNT=$(grep 'storage_account_name' "$BACKEND_TF" | sed 's/.*"\(.*\)".*/\1/')
-    RESOURCE_GROUP=$(grep 'resource_group_name' "$BACKEND_TF" | head -1 | sed 's/.*"\(.*\)".*/\1/')
+    STORAGE_ACCOUNT=$(grep 'storage_account_name' "$BACKEND_TF" | sed -E 's/.*[=][[:space:]]*"([^"]+)".*/\1/')
+    RESOURCE_GROUP=$(grep 'resource_group_name' "$BACKEND_TF" | head -1 | sed -E 's/.*[=][[:space:]]*"([^"]+)".*/\1/')
 
     if [ -z "$STORAGE_ACCOUNT" ] || [ -z "$RESOURCE_GROUP" ]; then
         print_error "Could not parse storage_account_name or resource_group_name from $BACKEND_TF"
@@ -42,7 +42,7 @@ if [ -f "$BACKEND_TF" ]; then
     print_info "Found existing backend.tf"
 else
     # Generate new names
-    STORAGE_ACCOUNT="tfstate${RANDOM}"
+    STORAGE_ACCOUNT="tfstate$(date +%s)"
     RESOURCE_GROUP="rg-tfstate-iemlops-${LOCATION}"
     GENERATED_BACKEND=true
     print_info "No backend.tf found — will generate with new storage account"

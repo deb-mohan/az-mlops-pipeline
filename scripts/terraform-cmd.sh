@@ -111,9 +111,13 @@ case "$COMMAND" in
         PLAN_FILE="${ENV}.tfplan"
         if [ -f "$PLAN_FILE" ]; then
             print_info "Applying saved plan: $PLAN_FILE"
-            terraform apply "$PLAN_FILE" ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
-            rm -f "$PLAN_FILE"
-            print_success "Plan file cleaned up"
+            if terraform apply "$PLAN_FILE" ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}; then
+                rm -f "$PLAN_FILE"
+                print_success "Plan file cleaned up"
+            else
+                print_error "Apply failed — plan file preserved for debugging: $PLAN_FILE"
+                exit 1
+            fi
         else
             print_warning "No saved plan found — running interactive apply"
             terraform apply ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}

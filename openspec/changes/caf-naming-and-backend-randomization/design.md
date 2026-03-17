@@ -106,8 +106,8 @@ The backend resource group also aligns with CAF: `rg-tfstate-iemlops-<location>`
 #### Storage Account Naming
 
 Per Azure docs for Terraform state storage:
-- Pattern: `tfstate$RANDOM` (bash `$RANDOM` gives 0-32767)
-- Example: `tfstate16359`
+- Pattern: `tfstate$(date +%s)` (Unix epoch timestamp)
+- Example: `tfstate1742169600`
 - Globally unique, lowercase, no hyphens, max 24 chars
 
 #### Removing `.env.local` Generation

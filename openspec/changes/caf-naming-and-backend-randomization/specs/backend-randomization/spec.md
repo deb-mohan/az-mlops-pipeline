@@ -1,11 +1,11 @@
 ## MODIFIED Requirements
 
 ### Requirement: Bootstrap generates backend.tf with random storage account name
-The system SHALL generate `infrastructure/terraform/backend.tf` with a storage account name using the pattern `tfstate$RANDOM`.
+The system SHALL generate `infrastructure/terraform/backend.tf` with a storage account name using the pattern `tfstate$(date +%s)` (epoch timestamp).
 
 #### Scenario: First-time bootstrap (no backend.tf)
 - **WHEN** developer runs bootstrap and `backend.tf` does not exist
-- **THEN** system generates a storage account name `tfstate$RANDOM`, creates Azure resources, and writes `backend.tf` with that name
+- **THEN** system generates a storage account name `tfstate$(date +%s)`, creates Azure resources, and writes `backend.tf` with that name
 
 #### Scenario: Backend.tf already exists with valid account
 - **WHEN** developer runs bootstrap and `backend.tf` exists with a storage account name that exists in Azure

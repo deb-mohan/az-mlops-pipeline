@@ -17,7 +17,7 @@
   - [x] 2.1.2 Add logic to parse `storage_account_name` from existing `backend.tf`
   - [x] 2.1.3 Add logic to parse `resource_group_name` from existing `backend.tf`
 - [x] 2.2 Add random name generation when no `backend.tf` exists
-  - [x] 2.2.1 Generate storage account name using `tfstate$RANDOM` pattern
+  - [x] 2.2.1 Generate storage account name using `tfstate$(date +%s)` pattern
   - [x] 2.2.2 Set resource group name to `rg-tfstate-iemlops-<location>`
 - [x] 2.3 Add `backend.tf` generation after successful resource creation
   - [x] 2.3.1 Write `backend.tf` with resource group, storage account, container, and `use_azuread_auth`

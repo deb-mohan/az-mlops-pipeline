@@ -149,7 +149,7 @@ This project uses Azure Storage for Terraform state management with automated ba
 The backend bootstrap process creates the following Azure resources:
 
 - **Resource Group**: `rg-tfstate-iemlops-<location>` (e.g., `rg-tfstate-iemlops-eastus`)
-- **Storage Account**: `tfstate<random>` (e.g., `tfstate16359` — random numeric suffix for global uniqueness)
+- **Storage Account**: `tfstate<epoch>` (e.g., `tfstate1742169600` — epoch timestamp for global uniqueness)
 - **Container**: `tfstate`
 - **Location**: `eastus` (default, configurable)
 
