@@ -1,33 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
 # Helper functions
 print_success() {
-    echo -e "${GREEN}✓${NC} $1"
+    echo "✓ $1"
 }
 
 print_error() {
-    echo -e "${RED}✗${NC} $1"
+    echo "✗ $1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠${NC} $1"
+    echo "⚠ $1"
 }
 
 print_info() {
-    echo -e "${BLUE}ℹ${NC} $1"
+    echo "ℹ $1"
 }
 
 print_header() {
     echo ""
-    echo -e "${BLUE}===${NC} $1 ${BLUE}===${NC}"
+    echo "=== $1 ==="
 }
 
 # Script starts here
@@ -151,11 +144,11 @@ echo ""
 print_success "All development tools have been installed successfully"
 echo ""
 echo "Next steps:"
-echo "  1. Authenticate with Azure: ${BLUE}az login${NC}"
-echo "  2. Bootstrap backend storage: ${BLUE}make bootstrap${NC}"
-echo "  3. Initialize environment: ${BLUE}make init-dev${NC}"
-echo "  4. Plan infrastructure: ${BLUE}make plan ENV=dev${NC}"
+echo "  1. Authenticate with Azure: az login"
+echo "  2. Bootstrap backend storage: make bootstrap"
+echo "  3. Initialize environment: make init-dev"
+echo "  4. Plan infrastructure: make plan ENV=dev"
 echo ""
 echo "Or use the quickstart command:"
-echo "  ${BLUE}make quickstart ENV=dev${NC}"
+echo "  make quickstart ENV=dev"
 echo ""
