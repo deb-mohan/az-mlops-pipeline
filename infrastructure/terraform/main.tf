@@ -14,7 +14,11 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
 }
 
 # Generate random suffix for globally unique resource names
@@ -49,6 +53,9 @@ locals {
       Project     = var.project_name
     }
   )
+
+  # Enable deletion protection for prod
+  is_prod = var.environment == "prod"
 }
 
 # Resource Group
@@ -102,4 +109,13 @@ module "ml_workspace" {
   application_insights_id = azurerm_application_insights.main.id
   key_vault_id            = azurerm_key_vault.main.id
   tags                    = local.common_tags
+}
+
+# Prod deletion protection — locks the resource group and all resources within it
+resource "azurerm_management_lock" "prod" {
+  count      = local.is_prod ? 1 : 0
+  name       = "prod-no-delete"
+  scope      = azurerm_resource_group.main.id
+  lock_level = "CanNotDelete"
+  notes      = "Prevent accidental deletion of prod resources"
 }

@@ -11,8 +11,8 @@ help:
 	@echo ""
 	@echo "Setup Commands:"
 	@echo "  make setup              Install all required development tools"
-	@echo "  make bootstrap          Create Azure backend storage for Terraform state (default: eastus)
-	@echo "  make bootstrap LOCATION=westus2  Bootstrap with custom location""
+	@echo "  make bootstrap          Create Azure backend storage for Terraform state (default: eastus)"
+	@echo "  make bootstrap LOCATION=westus2  Bootstrap with custom location"
 	@echo "  make quickstart ENV=dev Complete setup in one command (setup + bootstrap + init)"
 	@echo "  make quickstart ENV=dev LOCATION=westus2  Quickstart with custom location"
 	@echo ""
