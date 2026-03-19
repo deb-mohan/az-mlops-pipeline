@@ -1,33 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
 # Helper functions
 print_success() {
-    echo -e "${GREEN}✓${NC} $1"
+    echo "✓ $1"
 }
 
 print_error() {
-    echo -e "${RED}✗${NC} $1"
+    echo "✗ $1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠${NC} $1"
+    echo "⚠ $1"
 }
 
 print_info() {
-    echo -e "${BLUE}ℹ${NC} $1"
+    echo "ℹ $1"
 }
 
 print_header() {
     echo ""
-    echo -e "${BLUE}===${NC} $1 ${BLUE}===${NC}"
+    echo "=== $1 ==="
 }
 
 # 5.2: Validate command parameter
@@ -84,7 +77,7 @@ if [ ! -d ".terraform" ]; then
     print_error "Terraform is not initialized"
     echo ""
     echo "Please run initialization first:"
-    echo "  ${BLUE}make init-dev${NC} (or init-test, init-prod)"
+    echo "  make init-dev (or init-test, init-prod)"
     exit 1
 fi
 
@@ -94,7 +87,7 @@ if [[ "$COMMAND" == "plan" || "$COMMAND" == "apply" || "$COMMAND" == "destroy" ]
         print_error "Configuration file not found: ${ENV}.auto.tfvars"
         echo ""
         echo "Please run initialization first:"
-        echo "  ${BLUE}make init-${ENV}${NC}"
+        echo "  make init-${ENV}"
         exit 1
     fi
 fi
@@ -105,13 +98,30 @@ case "$COMMAND" in
     # 5.7: Plan command
     plan)
         print_header "Terraform Plan: $ENV"
-        terraform plan ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
+        PLAN_FILE="${ENV}.tfplan"
+        terraform plan -out="$PLAN_FILE" ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
+        echo ""
+        print_success "Plan saved to $PLAN_FILE"
+        echo "  Run 'make apply ENV=$ENV' to apply this exact plan"
         ;;
     
     # 5.8: Apply command
     apply)
         print_header "Terraform Apply: $ENV"
-        terraform apply ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
+        PLAN_FILE="${ENV}.tfplan"
+        if [ -f "$PLAN_FILE" ]; then
+            print_info "Applying saved plan: $PLAN_FILE"
+            if terraform apply "$PLAN_FILE" ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}; then
+                rm -f "$PLAN_FILE"
+                print_success "Plan file cleaned up"
+            else
+                print_error "Apply failed — plan file preserved for debugging: $PLAN_FILE"
+                exit 1
+            fi
+        else
+            print_warning "No saved plan found — running interactive apply"
+            terraform apply ${EXTRA_ARGS[@]+"${EXTRA_ARGS[@]}"}
+        fi
         ;;
     
     # 5.9: Destroy command with confirmation
@@ -119,7 +129,7 @@ case "$COMMAND" in
         print_header "Terraform Destroy: $ENV"
         print_warning "WARNING: This will destroy all resources in the $ENV environment!"
         echo ""
-        echo -e "${RED}This action cannot be undone!${NC}"
+        echo "This action cannot be undone!"
         echo ""
         read -p "Press ENTER to continue or Ctrl+C to cancel..."
         echo ""

@@ -1,33 +1,26 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m' # No Color
-
 # Helper functions
 print_success() {
-    echo -e "${GREEN}✓${NC} $1"
+    echo "✓ $1"
 }
 
 print_error() {
-    echo -e "${RED}✗${NC} $1"
+    echo "✗ $1"
 }
 
 print_warning() {
-    echo -e "${YELLOW}⚠${NC} $1"
+    echo "⚠ $1"
 }
 
 print_info() {
-    echo -e "${BLUE}ℹ${NC} $1"
+    echo "ℹ $1"
 }
 
 print_header() {
     echo ""
-    echo -e "${BLUE}===${NC} $1 ${BLUE}===${NC}"
+    echo "=== $1 ==="
 }
 
 # 4.2: Validate ENV parameter
@@ -87,10 +80,10 @@ print_header "Initialization Complete!"
 echo ""
 print_success "Terraform is initialized for the $ENV environment"
 echo ""
-echo "Backend state file: ${BLUE}${ENV}.terraform.tfstate${NC}"
-echo "Configuration file: ${BLUE}${ENV}.auto.tfvars${NC}"
+echo "Backend state file: ${ENV}.terraform.tfstate"
+echo "Configuration file: ${ENV}.auto.tfvars"
 echo ""
 echo "Next steps:"
-echo "  1. Review planned changes: ${BLUE}make plan ENV=$ENV${NC}"
-echo "  2. Apply infrastructure: ${BLUE}make apply ENV=$ENV${NC}"
+echo "  1. Review planned changes: make plan ENV=$ENV"
+echo "  2. Apply infrastructure: make apply ENV=$ENV"
 echo ""

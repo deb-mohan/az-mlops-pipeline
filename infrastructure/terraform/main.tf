@@ -14,7 +14,11 @@ terraform {
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    resource_group {
+      prevent_deletion_if_contains_resources = false
+    }
+  }
 }
 
 # Generate random suffix for globally unique resource names
@@ -28,14 +32,14 @@ resource "random_string" "suffix" {
   }
 }
 
-# Resource naming with environment-based convention
+# Resource naming with CAF prefix convention: {type}-{project}-{environment}
 locals {
-  resource_group_name = "${var.project_name}-${var.environment}-rg"
-  ml_workspace_name   = "${var.project_name}-${var.environment}-mlw"
+  resource_group_name = "rg-${var.project_name}-${var.environment}"
+  ml_workspace_name   = "mlw-${var.project_name}-${var.environment}"
 
-  # Storage account name: sanitized (no hyphens), with random suffix, max 24 chars
+  # Storage account name: CAF prefix "st", no hyphens, random suffix, max 24 chars
   storage_account_name = substr(
-    replace("${var.project_name}${var.environment}${random_string.suffix.result}sa", "-", ""),
+    replace("st${var.project_name}${var.environment}${random_string.suffix.result}", "-", ""),
     0,
     24
   )
@@ -49,6 +53,9 @@ locals {
       Project     = var.project_name
     }
   )
+
+  # Enable deletion protection for prod
+  is_prod = var.environment == "prod"
 }
 
 # Resource Group
@@ -73,7 +80,7 @@ module "storage" {
 
 # Application Insights for ML Workspace
 resource "azurerm_application_insights" "main" {
-  name                = "${var.project_name}-${var.environment}-ai"
+  name                = "appi-${var.project_name}-${var.environment}"
   location            = var.location
   resource_group_name = azurerm_resource_group.main.name
   application_type    = "web"
@@ -82,7 +89,7 @@ resource "azurerm_application_insights" "main" {
 
 # Key Vault for ML Workspace
 resource "azurerm_key_vault" "main" {
-  name                = substr("${var.project_name}-${var.environment}-kv-${random_string.suffix.result}", 0, 24)
+  name                = substr("kv-${var.project_name}-${var.environment}-${random_string.suffix.result}", 0, 24)
   location            = var.location
   resource_group_name = azurerm_resource_group.main.name
   tenant_id           = data.azurerm_client_config.current.tenant_id
@@ -102,4 +109,13 @@ module "ml_workspace" {
   application_insights_id = azurerm_application_insights.main.id
   key_vault_id            = azurerm_key_vault.main.id
   tags                    = local.common_tags
+}
+
+# Prod deletion protection — locks the resource group and all resources within it
+resource "azurerm_management_lock" "prod" {
+  count      = local.is_prod ? 1 : 0
+  name       = "prod-no-delete"
+  scope      = azurerm_resource_group.main.id
+  lock_level = "CanNotDelete"
+  notes      = "Prevent accidental deletion of prod resources"
 }
